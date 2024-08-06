@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -27,12 +28,20 @@ public class DefaultSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-       return httpSecurity
+       httpSecurity
+               .csrf(Customizer.withDefaults())
                .authorizeHttpRequests((authorize)->authorize
+                       //.requestMatchers("/app/user/logout/success").permitAll()
                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .permitAll()).build();
+                        .permitAll())
+               .logout((logout)-> logout
+                       .logoutUrl("/app/user/logout")
+                       .logoutSuccessUrl("/app/user/logout/success")
+                       .permitAll());
+
+       return httpSecurity.build();
     }
     @Bean
     @ConditionalOnMissingBean(UserDetailsService.class)
