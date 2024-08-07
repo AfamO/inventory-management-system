@@ -31,15 +31,20 @@ public class DefaultSecurityConfig {
        httpSecurity
                .csrf(Customizer.withDefaults())
                .authorizeHttpRequests((authorize)->authorize
+                       //.requestMatchers("/app/csrf").permitAll()
                        //.requestMatchers("/app/user/logout/success").permitAll()
                        .anyRequest().authenticated())
+               //.httpBasic(Customizer.withDefaults()) // don't really need this, among other reasons it is old fashioned
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll())
                .logout((logout)-> logout
                        .logoutUrl("/app/user/logout")
                        .logoutSuccessUrl("/app/user/logout/success")
-                       .permitAll());
+                       .permitAll())
+               .sessionManagement((session) -> session
+                       .sessionFixation((sessionFixationConfigurer -> sessionFixationConfigurer
+                               .changeSessionId())));
 
        return httpSecurity.build();
     }
