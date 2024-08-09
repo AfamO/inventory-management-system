@@ -1,6 +1,7 @@
 package example.spring_security;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -28,14 +29,20 @@ public class DefaultSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-       httpSecurity
+       HttpServletRequest httpServletRequest;
+        httpSecurity
                .csrf(Customizer.withDefaults())
                .authorizeHttpRequests((authorize)->authorize
                        //.requestMatchers("/app/csrf").permitAll()
                        //.requestMatchers("/app/user/logout/success").permitAll()
                        .anyRequest().authenticated())
                //.httpBasic(Customizer.withDefaults()) // don't really need this, among other reasons it is old fashioned
-                .formLogin(form -> form
+               .headers((header)->header
+                       .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                               .includeSubDomains(true)
+                               .preload(true)
+                               .maxAgeInSeconds(60)))
+               .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll())
                .logout((logout)-> logout
@@ -52,7 +59,7 @@ public class DefaultSecurityConfig {
     @ConditionalOnMissingBean(UserDetailsService.class)
     InMemoryUserDetailsManager inMemoryUserDetailsManager() {
         String generatedPassword = "myPass";
-        return new InMemoryUserDetailsManager(User.withUsername("user")
+        return new InMemoryUserDetailsManager(User.withUsername("AfamO")
                 .password(passwordEncoder().encode(generatedPassword)).roles("USER").build());
     }
 
