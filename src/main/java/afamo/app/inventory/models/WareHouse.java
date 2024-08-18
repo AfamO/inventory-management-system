@@ -20,7 +20,7 @@ public class WareHouse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int demandForecast;
+    private int regionalDemandForecast;
     private int regionalDemandVariance;
     private String code;
     private String state;

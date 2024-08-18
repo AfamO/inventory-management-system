@@ -27,6 +27,7 @@ import static jakarta.persistence.TemporalType.TIMESTAMP;
 @AllArgsConstructor
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
+
 public abstract class Auditable<U> {
 
     /**

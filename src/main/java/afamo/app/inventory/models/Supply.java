@@ -15,15 +15,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "supply")
 
-public class Supply extends Auditable<Supply> {
+public class Supply  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long warehouseId;
-    private int productId;
-    private int inventoryId;
-    private int vendorId;
-    private int reOrderQty;
+    private Long inventoryId;
+    private Long vendorId;
+    private int orderedQty;
     private int leadTimeInDays=10;
 
 }

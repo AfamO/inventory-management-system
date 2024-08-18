@@ -27,6 +27,8 @@ public class Vendor {
     private String region;
     private boolean itemAvailability=false;
     private int leadTimeInDays=10;
+    private int minimumOrderQty = 5;
+    private int maximumSuppliableOrder = 0;
     private LocalDateTime createdDate = LocalDateTime.now();
 
     public Vendor(String name, String region) {

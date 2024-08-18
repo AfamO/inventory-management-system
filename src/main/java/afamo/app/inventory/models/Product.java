@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
                 @StoredProcedureParameter(mode = ParameterMode.OUT, name = "count_out", type = Integer.class)
         }
 )
-public class Product extends Auditable<Product> {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

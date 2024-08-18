@@ -15,15 +15,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "inventory")
 
-public class Inventory extends Auditable<Inventory> {
+public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long warehouseId;
-    private int productId;
+    private Long productId;
     private int stockAtHand;
     private int minimumQtyReorderPoint;
     private int maximumQty;
+    private int forecastedDemand;
+    private int uncertaintySafetyFactor;
+    private int holdingCost;
     private LocalDateTime createdDate = LocalDateTime.now();
 
 }
