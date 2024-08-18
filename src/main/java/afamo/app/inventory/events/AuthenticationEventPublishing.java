@@ -1,4 +1,4 @@
-package example.spring_security.events;
+package afamo.app.inventory.events;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;

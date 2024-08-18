@@ -1,4 +1,4 @@
-package example.spring_security.events;
+package afamo.app.inventory.events;
 
 
 import lombok.extern.slf4j.Slf4j;

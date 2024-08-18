@@ -1,13 +1,13 @@
-package example.spring_security;
+package afamo.app.inventory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringSecurityApplication {
+public class InventorySystemApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringSecurityApplication.class, args);
+		SpringApplication.run(InventorySystemApplication.class, args);
 	}
 
 }

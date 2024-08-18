@@ -1,4 +1,4 @@
-package example.spring_security;
+package afamo.app.inventory;
 
 
 import jakarta.servlet.http.HttpServletRequest;

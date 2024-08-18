@@ -1,4 +1,4 @@
-package example.spring_security.controllers;
+package afamo.app.inventory.controllers;
 
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
