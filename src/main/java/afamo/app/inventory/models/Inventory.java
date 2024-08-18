@@ -22,7 +22,7 @@ public class Inventory extends Auditable<Inventory> {
     private Long warehouseId;
     private int productId;
     private int stockAtHand;
-    private int minimumQty;
+    private int minimumQtyReorderPoint;
     private int maximumQty;
     private LocalDateTime createdDate = LocalDateTime.now();
 
