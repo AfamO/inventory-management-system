@@ -26,7 +26,7 @@ public class Inventory {
     private int maximumQty;
     private int forecastedDemand;
     private int uncertaintySafetyFactor;
-    private int holdingCost;
+    private int holdingCost = 1;
     private LocalDateTime createdDate = LocalDateTime.now();
 
 }

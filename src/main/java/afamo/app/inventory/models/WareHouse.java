@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "warehouse")
@@ -19,14 +18,14 @@ public class WareHouse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private int regionalDemandForecast;
-    private int regionalDemandVariance;
+    private String name = "VI WareHouse";
+    private int regionalDemandForecast = 5;
+    private int regionalDemandVariance = 2;
     private String code;
     private String state;
     private String address;
     private String country;
-    private String region;
+    private String region = "VI";
     private LocalDateTime createdDate = LocalDateTime.now();
 
     public WareHouse(String name, String region) {

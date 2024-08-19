@@ -21,10 +21,10 @@ public class Vendor {
     private Long id;
     private Long productId;
     private String name;
-    private String state;
+    private String state = "Lagos";
     private String address;
-    private String country;
-    private String region;
+    private String country = "NG";
+    private String region = "VI";
     private boolean itemAvailability=false;
     private int leadTimeInDays=10;
     private int minimumOrderQty = 5;

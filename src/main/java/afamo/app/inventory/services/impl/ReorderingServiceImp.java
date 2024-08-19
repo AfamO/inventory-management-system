@@ -11,10 +11,17 @@ import afamo.app.inventory.repository.VendorRepository;
 import afamo.app.inventory.repository.WareHouseRepository;
 import afamo.app.inventory.services.ReorderingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
+@Service
 public class ReorderingServiceImp implements ReorderingService {
 
     private final InventoryRepository inventoryRepository;
@@ -33,11 +40,63 @@ public class ReorderingServiceImp implements ReorderingService {
 
 
     @Override
-    public void triggerReOrder(Inventory inventory) {
+    public void triggerReOrder(Inventory inventory) throws BadRequestException {
         int optimalQty = this.calculateOptimalReorderQuantity(inventory);
         if (optimalQty > 0) {
             placeOrder(inventory, optimalQty);
         }
+    }
+
+    @Override
+    public Inventory getSingleInventory(Long id) {
+        Inventory inventory = inventoryRepository.findById(id).orElseThrow(()->new NoSuchElementException("OOps no inventory with this Id found"));
+        return inventory;
+    }
+
+    private Product createProduct(Product product) {
+        // First check if the product already exists
+        // Usually, other parameters  such as product/item unique bar code would be used to query the DB to find out if the product already exists.
+        if (product.getId() == null) {
+            product = productRepository.save(product);
+            //Create Vendor for the product
+            Vendor vendor = new Vendor("Laptop Supplier", "VI");
+            vendor.setProductId(product.getId());
+            vendorRepository.save(vendor);
+        }
+        log.info("Inventory already exists, no need of creating it again");
+        return product;
+    }
+
+    @Override
+    public WareHouse createWareHouse(WareHouse wareHouse) {
+        // First check if the wareHouse already exists
+        // Usually, other parameters  such as wareHouse unique code would be used to query the DB to find out if the wareHouse already exists.
+        //
+        if (wareHouse.getId() == null) {
+            wareHouse = wareHouseRepository.save(wareHouse);
+        }
+        log.info("Inventory already exists, no need of creating it again");
+        return wareHouse;
+    }
+    @Override
+    public Inventory createInventory(Inventory inventory) {
+        // First check if the inventory already exists
+        // Usually, other parameters  such as wareHouse code would be used to query the DB to find out if the inventory already exists.
+        //
+        if (inventory.getId() == null) {
+            WareHouse wareHouse = this.createWareHouse(new WareHouse()); // normally there should be many parameters
+            Product product = this.createProduct(new Product()); // normally there should be many parameters
+            inventory.setWarehouseId(wareHouse.getId());
+            inventory.setProductId(product.getId());
+            inventory = inventoryRepository.save(inventory);
+        }
+        log.info("Inventory already exists, no need of creating it again");
+        return inventory;
+    }
+
+    @Override
+    public Page<List<Inventory>> getInventories(Long wareHouseId, PageRequest pageRequest) {
+        return inventoryRepository.selectInventoryByWareHouse(wareHouseId, pageRequest);
     }
 
     @Override
@@ -46,15 +105,17 @@ public class ReorderingServiceImp implements ReorderingService {
                 orElseThrow();
         List<Vendor> vendorList = vendorRepository.findByProductId(product.getId());
         //Does the desired quantity meet the barest minimum requirement of any supplier?
-        Vendor availableVendor = vendorList.stream().filter(vendor -> vendor.getMinimumOrderQty() >= quantity).findAny().get();
-        if (availableVendor !=null) {
+        Optional<Vendor> availableVendor = vendorList.stream().filter(vendor -> quantity >= vendor.getMinimumOrderQty()).findAny();
+        log.info("Found Vendor {}", availableVendor);
+        if (!availableVendor.isEmpty()) {
             /**
              // SubmitOrder...Typically there should be a kind of web service here, but let's just demo and assume it
              */
-            log.info("Order Successfully Submitted");
+            log.info("Order's RFQ Successfully Submitted");
             Supply supply = new Supply();
             supply.setOrderedQty(quantity);
             supply.setInventoryId(inventory.getId());
+            supply.setVendorId(availableVendor.get().getId());
 
             log.info("Order Successfully Acquired and Purchased::{}",supply);
             //update stock level
@@ -68,7 +129,7 @@ public class ReorderingServiceImp implements ReorderingService {
 
     }
 
-    public void monitorStockLevel (List<Inventory> inventoryList) {
+    public void monitorStockLevel (List<Inventory> inventoryList) throws BadRequestException {
         for (Inventory inventory : inventoryList) {
             if (inventory.getStockAtHand() <= inventory.getMinimumQtyReorderPoint()) {
                 triggerReOrder(inventory);
@@ -91,18 +152,22 @@ public class ReorderingServiceImp implements ReorderingService {
         }
     }
 
-    private int calculateOptimalReorderQuantity(Inventory inventory) {
+    public Integer calculateOptimalReorderQuantity(Inventory inventory) throws BadRequestException {
         Product product = productRepository.findById(inventory.getProductId()).
                 orElseThrow();
         WareHouse wareHouse = wareHouseRepository.getReferenceById(inventory.getWarehouseId());
-        int optimalQtyToOrder = 0;
+        Integer optimalQtyToOrder = 0;
         if (wareHouse!= null){
+            log.info("The retrieved WareHouse is :: {}",wareHouse);
             List<Vendor> vendorList = vendorRepository.findByProductId(product.getId());
             double avgLeadTime = 0D;
             if(!vendorList.isEmpty()) {
                 avgLeadTime = vendorList.stream().map((vendor) -> vendor.getLeadTimeInDays()).count()/vendorList.size();
             }
 
+            if (inventory.getHoldingCost() == 0){
+                throw new BadRequestException("The holding cost cannot be zero(0)");
+            }
             double leadTimeRegionalDemandSupplierConstraints =
                     (avgLeadTime * wareHouse.getRegionalDemandForecast() * wareHouse.getRegionalDemandVariance())/inventory.getHoldingCost();
             optimalQtyToOrder = (int)Double.max(inventory.getMaximumQty(), leadTimeRegionalDemandSupplierConstraints);
@@ -117,6 +182,7 @@ public class ReorderingServiceImp implements ReorderingService {
     }
 
     private void invokeBackOrder(Inventory inventory, int quantity) {
-
+      log.info("Invoking Back Order....");
+      //Yet to be implemented
     }
 }
