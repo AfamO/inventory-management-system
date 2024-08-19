@@ -17,7 +17,7 @@ public interface ReorderingService {
 
     public Integer calculateOptimalReorderQuantity(Inventory inventory) throws BadRequestException;
 
-   public WareHouse createWareHouse(WareHouse wareHouse);
+    public WareHouse createWareHouse(WareHouse wareHouse);
 
     public Inventory createInventory(Inventory inventory);
     public Page<List<Inventory>> getInventories(Long productId,PageRequest pageRequest);

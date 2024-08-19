@@ -12,6 +12,7 @@ import afamo.app.inventory.repository.WareHouseRepository;
 import afamo.app.inventory.services.ReorderingService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class ReorderingServiceImp implements ReorderingService {
 
 
     @Override
+    @Cacheable
     public void triggerReOrder(Inventory inventory) throws BadRequestException {
         int optimalQty = this.calculateOptimalReorderQuantity(inventory);
         if (optimalQty > 0) {
@@ -48,11 +50,13 @@ public class ReorderingServiceImp implements ReorderingService {
     }
 
     @Override
+    @Cacheable
     public Inventory getSingleInventory(Long id) {
         Inventory inventory = inventoryRepository.findById(id).orElseThrow(()->new NoSuchElementException("OOps no inventory with this Id found"));
         return inventory;
     }
 
+    @Cacheable
     private Product createProduct(Product product) {
         // First check if the product already exists
         // Usually, other parameters  such as product/item unique bar code would be used to query the DB to find out if the product already exists.
@@ -79,6 +83,7 @@ public class ReorderingServiceImp implements ReorderingService {
         return wareHouse;
     }
     @Override
+    @Cacheable
     public Inventory createInventory(Inventory inventory) {
         // First check if the inventory already exists
         // Usually, other parameters  such as wareHouse code would be used to query the DB to find out if the inventory already exists.
@@ -100,6 +105,7 @@ public class ReorderingServiceImp implements ReorderingService {
     }
 
     @Override
+    @Cacheable
     public void placeOrder(Inventory inventory, int quantity) {
         Product product = productRepository.findById(inventory.getProductId()).
                 orElseThrow();
