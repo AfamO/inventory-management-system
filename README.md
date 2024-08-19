@@ -40,3 +40,6 @@ After building the application, an executable `target/*.jar` is generated that c
     ./*.jar
 
 The application health endpoint is exposed under `/actuator/health`
+
+### Assumptions
+Some assumptions were made in appropraite parts of the codes with comments. 
