@@ -41,7 +41,7 @@ public class DefaultSecurityConfig {
                .csrf(Customizer.withDefaults())
                .authorizeHttpRequests((authorize)->authorize
                        .requestMatchers("/app/welcome/**").access(hasScope("profile")) // does the user have a token with a 'profile' scope?
-                       //.requestMatchers("/app/csrf").permitAll()
+                       .requestMatchers("/ims/app/api/v1/csrf").permitAll()
                        //.requestMatchers("/app/user/logout/success").permitAll()
                        .anyRequest().authenticated())
                //.httpBasic(Customizer.withDefaults()) // don't really need this, among other reasons it is old fashioned

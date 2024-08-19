@@ -3,7 +3,9 @@ package afamo.app.inventory;
 import afamo.app.inventory.models.Inventory;
 import afamo.app.inventory.services.ReorderingService;
 import lombok.extern.slf4j.Slf4j;
+import netscape.javascript.JSObject;
 import org.apache.coyote.BadRequestException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
@@ -91,6 +95,27 @@ public class InventoryAppTests {
         inventory = reorderingService.getSingleInventory(inventory.getId());
 
         Assertions.assertTrue(inventory.getStockAtHand()  > initialStockAtHand);
+    }
+
+    @Test
+    public void testMakeGetRequestAndGetCSRFToken() throws Exception {
+
+        // build the request
+        HttpEntity<String> httpEntity= new HttpEntity<>("good", headers);
+        int port = 8081;
+        WEBSERVICEBASEURL = "http://localhost:"+ port + "/ims/app/api/v1/csrf";
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(WEBSERVICEBASEURL,  String.class, httpEntity);
+        if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+            log.info("Web Service Response::{}",responseEntity);
+            log.info("Web Service Data::{}",responseEntity.getBody());
+            JSONObject csrfJson = new JSONObject(responseEntity.getBody());
+            Assertions.assertEquals("X-CSRF-TOKEN", csrfJson.getString("headerName"));
+
+            Assertions.assertEquals(csrfJson.getString("parameterName"), "_csrf");
+            Assertions.assertNotNull(csrfJson.getString("token")); // there must be token in the response body
+
+        }
+
     }
 
 }

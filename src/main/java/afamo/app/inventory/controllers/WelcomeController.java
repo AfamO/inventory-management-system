@@ -29,7 +29,7 @@ public class WelcomeController {
         return "Hi "+auth.getName()+",Welcome to my spring security app";
     }
 
-    @GetMapping("/csrf")
+    @GetMapping("api/v1/csrf")
     public CsrfToken getCSRFToken(CsrfToken csrfToken) {
         return csrfToken;
     }
