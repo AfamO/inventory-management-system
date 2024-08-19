@@ -27,6 +27,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String barCode;
     private double price;
     private LocalDateTime createdDate = LocalDateTime.now();
 

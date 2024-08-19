@@ -1,12 +1,15 @@
 package afamo.app.inventory.services.impl;
 
+import afamo.app.inventory.enums.PurchaseOrderStatus;
 import afamo.app.inventory.models.Inventory;
 import afamo.app.inventory.models.Product;
+import afamo.app.inventory.models.PurchaseOrder;
 import afamo.app.inventory.models.Supply;
 import afamo.app.inventory.models.Vendor;
 import afamo.app.inventory.models.WareHouse;
 import afamo.app.inventory.repository.InventoryRepository;
 import afamo.app.inventory.repository.ProductRepository;
+import afamo.app.inventory.repository.PurchaseOrderRepository;
 import afamo.app.inventory.repository.VendorRepository;
 import afamo.app.inventory.repository.WareHouseRepository;
 import afamo.app.inventory.services.ReorderingService;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,11 +36,13 @@ public class ReorderingServiceImp implements ReorderingService {
 
     private final WareHouseRepository wareHouseRepository;
 
-    public ReorderingServiceImp(InventoryRepository inventoryRepository, ProductRepository productRepository, VendorRepository vendorRepository, WareHouseRepository wareHouseRepository) {
+    private final PurchaseOrderRepository purchaseOrderRepository;
+    public ReorderingServiceImp(InventoryRepository inventoryRepository, ProductRepository productRepository, VendorRepository vendorRepository, WareHouseRepository wareHouseRepository, PurchaseOrderRepository purchaseOrderRepository) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.vendorRepository = vendorRepository;
         this.wareHouseRepository = wareHouseRepository;
+        this.purchaseOrderRepository = purchaseOrderRepository;
     }
 
 
@@ -44,6 +50,7 @@ public class ReorderingServiceImp implements ReorderingService {
     @Cacheable
     public void triggerReOrder(Inventory inventory) throws BadRequestException {
         int optimalQty = this.calculateOptimalReorderQuantity(inventory);
+        log.info("OptimalQty=={}",optimalQty);
         if (optimalQty > 0) {
             placeOrder(inventory, optimalQty);
         }
@@ -114,8 +121,16 @@ public class ReorderingServiceImp implements ReorderingService {
         Optional<Vendor> availableVendor = vendorList.stream().filter(vendor -> quantity >= vendor.getMinimumOrderQty()).findAny();
         log.info("Found Vendor {}", availableVendor);
         if (!availableVendor.isEmpty()) {
+            PurchaseOrder purchaseOrder = new PurchaseOrder();
+            purchaseOrder.setQuantity(quantity);
+            purchaseOrder.setStatus(PurchaseOrderStatus.INITIATED);
+            purchaseOrder.setProductId(product.getId());
+            purchaseOrder.setInventoryId(inventory.getId());
+            purchaseOrder.setDeliveryDate(LocalDateTime.now().plusDays(availableVendor.get().getLeadTimeInDays()));
+            purchaseOrder = purchaseOrderRepository.save(purchaseOrder);
+
             /**
-             // SubmitOrder...Typically there should be a kind of web service here, but let's just demo and assume it
+             // SubmitOrder...Typically there should be a kind of web service here an email should be sent to the vendor, but let's just demo and assume it
              */
             log.info("Order's RFQ Successfully Submitted");
             Supply supply = new Supply();
@@ -130,18 +145,14 @@ public class ReorderingServiceImp implements ReorderingService {
             // invoke backorder then
             this.invokeBackOrder(inventory, quantity);
         }
-
-
-
     }
 
-    public void monitorStockLevel (List<Inventory> inventoryList) throws BadRequestException {
+    private void monitorStockLevel (List<Inventory> inventoryList) throws BadRequestException {
         for (Inventory inventory : inventoryList) {
             if (inventory.getStockAtHand() <= inventory.getMinimumQtyReorderPoint()) {
                 triggerReOrder(inventory);
             }
         }
-
     }
 
     private void  calculateReorderPoints(List<Inventory> inventoryList) {
