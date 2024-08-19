@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -196,6 +197,16 @@ public class ReorderingServiceImp implements ReorderingService {
     private void updateStockLevel(Inventory inventory, int quantity) {
         inventory.setStockAtHand(inventory.getStockAtHand() + quantity);
         inventoryRepository.save(inventory);
+    }
+
+    public void adjustReOrderPointForRegionalDemandVariance(Inventory inventory) {
+        WareHouse wareHouse = wareHouseRepository.getReferenceById(inventory.getWarehouseId());
+        if (wareHouse != null) {
+            //adjust demandForecast to reflect regional demand factor
+            inventory.setForecastedDemand((int) (Math.floor(inventory.getForecastedDemand()) * wareHouse.getRegionalDemandVariance()));
+            inventory.setUncertaintySafetyFactor(2); //recalculate safety stock, let's assume it is 2
+            calculateReorderPoints(Arrays.asList(inventory)); //finally re-calculate re-order points based on the above regional adjustments;
+        }
     }
 
     private void invokeBackOrder(Inventory inventory, int quantity) {

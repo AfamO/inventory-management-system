@@ -20,7 +20,7 @@ public class WareHouse {
     private Long id;
     private String name = "VI WareHouse";
     private int regionalDemandForecast = 10;
-    private int regionalDemandVariance = 3;
+    private double regionalDemandVariance = 3.8;
     private String code;
     private String state;
     private String address;
