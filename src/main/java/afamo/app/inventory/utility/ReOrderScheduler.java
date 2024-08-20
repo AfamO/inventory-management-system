@@ -29,7 +29,7 @@ public class ReOrderScheduler {
         log.info("ReOrder Monitoring Interval===>{}",appProperties.getReOrderMonitorInterval());
     }
 
-    //Every 15 seconds
+    //Every 60 seconds
     @Scheduled(fixedRate = monitorRate)
     public void scheduleReOrderMonitoring() throws BadRequestException {
         //Assume page size is 5, page is 0

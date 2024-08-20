@@ -172,14 +172,29 @@ public class ReorderingServiceImp implements ReorderingService {
                 orElseThrow();
         List<Vendor> vendorList = vendorRepository.findByProductId(product.getId());
 
+        /**
+         Basic Formula to calculate Reorder Point:
+         Reorder Point (ROP) = Demand Lead Time + SafetyStock Uncertainty  Factor
+        NB: Demand Lead Time = Avg Daily Demand * Lead Time(in days)
+         */
+        // I assume that the leadTime is a property assigned to a vendor/supplier.
+        // But it is not necessarily so, since supplier delays is not the only factor that can affect lead time. I mean shipping delays and other factors can as well
         for (Vendor vendor : vendorList) {
+            // calculate forecasted demand during the lead Time
+            inventory.setForecastedDemand(inventory.getAverageDemandPerDay() * vendor.getLeadTimeInDays());
             int reorderPointQty = (vendor.getLeadTimeInDays() * inventory.getForecastedDemand()) + inventory.getUncertaintySafetyFactor();
             inventory.setMinimumQtyReorderPoint(reorderPointQty);
             inventoryRepository.save(inventory); //save the inventory;
+            /**
+             * NB: Normally the uncertainty safety stock formula should be :
+             *     // Safety Stock(SS) =Z× σD × LT
+             *     Where Z represents the expected service level such as 99.999%
+             *     σD is the standard deviation for the demand
+             *     LT is obviously the lead time in days.
+             */
         }
         }
     }
-
     @Transactional
     public Integer calculateOptimalReorderQuantity(Inventory inventory) throws BadRequestException {
         Product product = productRepository.findById(inventory.getProductId()).

@@ -24,7 +24,15 @@ public class Inventory {
     private int minimumQtyReorderPoint;
     private int maximumQty;
     private int forecastedDemand;
-    private int uncertaintySafetyFactor;
+    private int averageDemandPerDay = 10;
+    /**
+     * NB: Normally the uncertainty safety stock formula should be :
+     *     // Safety Stock(SS) =Z× σD × LT
+     *     Where Z represents the expected service level such as 99.999%
+     *     σD is the standard deviation for the demand
+     *     LT is obviously the lead time in days.
+     */
+    private int uncertaintySafetyFactor = 1; // Assuming that it was calculated to be 1 using to the above formula.
     private int holdingCost = 1;
     private LocalDateTime createdDate = LocalDateTime.now();
 
