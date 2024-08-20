@@ -1,4 +1,4 @@
-package afamo.app.inventory;
+package afamo.app.inventory.config;
 
 
 import jakarta.servlet.http.HttpServletRequest;

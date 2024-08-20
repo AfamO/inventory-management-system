@@ -151,7 +151,14 @@ public class ReorderingServiceImp implements ReorderingService {
         }
     }
 
-    private void monitorStockLevel (List<Inventory> inventoryList) throws BadRequestException {
+    @Override
+    public Page<Inventory> getPageableInventories(PageRequest pageRequest) throws BadRequestException {
+        if (pageRequest == null)
+            throw new BadRequestException("You must provide a page parameter");
+        return inventoryRepository.findAll(pageRequest);
+    }
+
+    public void monitorStockLevel (List<Inventory> inventoryList) throws BadRequestException {
         for (Inventory inventory : inventoryList) {
             if (inventory.getStockAtHand() <= inventory.getMinimumQtyReorderPoint()) {
                 triggerReOrder(inventory);
