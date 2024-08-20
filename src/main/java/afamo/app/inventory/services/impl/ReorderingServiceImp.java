@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -49,6 +50,7 @@ public class ReorderingServiceImp implements ReorderingService {
 
     @Override
     @Cacheable
+    @Transactional
     public void triggerReOrder(Inventory inventory) throws BadRequestException {
         int optimalQty = this.calculateOptimalReorderQuantity(inventory);
         log.info("OptimalQty=={}",optimalQty);
@@ -65,6 +67,7 @@ public class ReorderingServiceImp implements ReorderingService {
     }
 
     @Cacheable
+    @Transactional
     private Product createProduct(Product product) {
         // First check if the product already exists
         // Usually, other parameters  such as product/item unique bar code would be used to query the DB to find out if the product already exists.
@@ -194,6 +197,7 @@ public class ReorderingServiceImp implements ReorderingService {
         return optimalQtyToOrder;
 
     }
+    @Transactional
     private void updateStockLevel(Inventory inventory, int quantity) {
         inventory.setStockAtHand(inventory.getStockAtHand() + quantity);
         inventoryRepository.save(inventory);

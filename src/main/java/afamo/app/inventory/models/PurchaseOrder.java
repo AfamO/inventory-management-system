@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class PurchaseOrder {
     private Long productId;
     private int quantity;
     private int orderDeliveryDuration;
+    private BigDecimal amount;
     private PurchaseOrderStatus status = PurchaseOrderStatus.FULFILLED;
     private LocalDateTime createdDate = LocalDateTime.now();
     private LocalDateTime deliveryDate;
