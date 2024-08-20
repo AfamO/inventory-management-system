@@ -11,11 +11,8 @@ Requirements for the software and other tools to build, test and push
 
 - [Maven](https://maven.apache.org/)
 - [Java 21 or above](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
-
-  Requirements for the software to run
-
-- [Keycloak](https://www.keycloak.org/)
-- [Java 21 or above](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+- [Keycloak](https://www.keycloak.org/) properly set up and preferably running as a docker container
+-  Edit the application properties file to reflect the Keycloak `issuer-uri` setting.
 
 ### Installing
 
