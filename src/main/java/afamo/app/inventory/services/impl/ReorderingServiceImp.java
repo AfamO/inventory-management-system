@@ -180,6 +180,7 @@ public class ReorderingServiceImp implements ReorderingService {
         }
     }
 
+    @Transactional
     public Integer calculateOptimalReorderQuantity(Inventory inventory) throws BadRequestException {
         Product product = productRepository.findById(inventory.getProductId()).
                 orElseThrow();

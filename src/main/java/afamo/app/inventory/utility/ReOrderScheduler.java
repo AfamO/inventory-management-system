@@ -36,6 +36,9 @@ public class ReOrderScheduler {
         int page = 0; int size =5;
         // retrieve pageable stock
         List<Inventory> inventoryList = reorderingService.getPageableInventories(PageRequest.of(page,size)).getContent();
+        for (Inventory inventory : inventoryList) {
+            reorderingService.calculateOptimalReorderQuantity(inventory);
+        }
         reorderingService.monitorStockLevel(inventoryList);
         log.info("Stock Level Monitoring started.... ==>{}",inventoryList);
     }
