@@ -21,7 +21,7 @@ public class ReOrderScheduler {
 
 
     private final AppProperties appProperties;
-    private static final long monitorRate = 30000;
+    private static final long monitorRate = 60000;
     public ReOrderScheduler(ReorderingService reorderingService, AppProperties appProperties) {
         this.reorderingService = reorderingService;
         this.appProperties = appProperties;
