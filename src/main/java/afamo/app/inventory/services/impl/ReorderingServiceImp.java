@@ -180,7 +180,7 @@ public class ReorderingServiceImp implements ReorderingService {
         // I assume that the leadTime is a property assigned to a vendor/supplier.
         // But it is not necessarily so, since supplier delays is not the only factor that can affect lead time. I mean shipping delays and other factors can as well
         for (Vendor vendor : vendorList) {
-            // calculate forecasted demand during the lead Time
+            // calculate forecasted-demand during the lead Time
             inventory.setForecastedDemand(inventory.getAverageDemandPerDay() * vendor.getLeadTimeInDays());
             int reorderPointQty = (vendor.getLeadTimeInDays() * inventory.getForecastedDemand()) + inventory.getUncertaintySafetyFactor();
             inventory.setMinimumQtyReorderPoint(reorderPointQty);
