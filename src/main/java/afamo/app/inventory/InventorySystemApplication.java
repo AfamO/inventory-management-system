@@ -2,6 +2,7 @@ package afamo.app.inventory;
 
 import afamo.app.inventory.config.AppProperties;
 import afamo.app.inventory.models.Inventory;
+import afamo.app.inventory.models.User;
 import afamo.app.inventory.services.ReorderingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -43,6 +44,12 @@ public class InventorySystemApplication {
 			inventory.setUncertaintySafetyFactor(2);
 			inventory = reorderingService.createInventory(inventory);
 			log.info("Initial  Data Seeding successfully Done");
+			User user = new User.UserBuilder("Afam","Okonkwo")
+					.age(30)
+					.phone("08034561289")
+					.address("No 2 Ciga Gufu Street, Ojota, Lagos")
+					.build();
+			log.info("My User builder object is {}",user);
 		};
 	}
 
