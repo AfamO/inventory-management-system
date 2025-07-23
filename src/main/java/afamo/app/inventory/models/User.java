@@ -1,6 +1,19 @@
 package afamo.app.inventory.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
+@Table(name = "user")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String firstName;
     private  String lastName;
     private  int age;
@@ -41,5 +54,16 @@ public class User {
         public  User build () {
             return  new User(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 }

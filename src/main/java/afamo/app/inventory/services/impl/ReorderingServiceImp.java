@@ -2,12 +2,15 @@ package afamo.app.inventory.services.impl;
 
 import afamo.app.inventory.enums.PurchaseOrderStatus;
 import afamo.app.inventory.models.Inventory;
+import afamo.app.inventory.models.Order;
 import afamo.app.inventory.models.Product;
 import afamo.app.inventory.models.PurchaseOrder;
 import afamo.app.inventory.models.Supply;
+import afamo.app.inventory.models.User;
 import afamo.app.inventory.models.Vendor;
 import afamo.app.inventory.models.WareHouse;
 import afamo.app.inventory.repository.InventoryRepository;
+import afamo.app.inventory.repository.OrderRepository;
 import afamo.app.inventory.repository.ProductRepository;
 import afamo.app.inventory.repository.PurchaseOrderRepository;
 import afamo.app.inventory.repository.VendorRepository;
@@ -15,12 +18,17 @@ import afamo.app.inventory.repository.WareHouseRepository;
 import afamo.app.inventory.services.ReorderingService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.KeyGenerator;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +37,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@EnableCaching
 public class ReorderingServiceImp implements ReorderingService {
 
     private final InventoryRepository inventoryRepository;
@@ -36,20 +45,21 @@ public class ReorderingServiceImp implements ReorderingService {
 
     private final VendorRepository vendorRepository;
 
+    private final OrderRepository orderRepository;
     private final WareHouseRepository wareHouseRepository;
 
     private final PurchaseOrderRepository purchaseOrderRepository;
-    public ReorderingServiceImp(InventoryRepository inventoryRepository, ProductRepository productRepository, VendorRepository vendorRepository, WareHouseRepository wareHouseRepository, PurchaseOrderRepository purchaseOrderRepository) {
+    public ReorderingServiceImp(InventoryRepository inventoryRepository, ProductRepository productRepository, VendorRepository vendorRepository, OrderRepository orderRepository, WareHouseRepository wareHouseRepository, PurchaseOrderRepository purchaseOrderRepository) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.vendorRepository = vendorRepository;
+        this.orderRepository = orderRepository;
         this.wareHouseRepository = wareHouseRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
     }
 
 
     @Override
-    @Cacheable
     @Transactional
     public void triggerReOrder(Inventory inventory) throws BadRequestException {
         int optimalQty = this.calculateOptimalReorderQuantity(inventory);
@@ -60,13 +70,12 @@ public class ReorderingServiceImp implements ReorderingService {
     }
 
     @Override
-    @Cacheable
     public Inventory getSingleInventory(Long id) {
         Inventory inventory = inventoryRepository.findById(id).orElseThrow(()->new NoSuchElementException("OOps no inventory with this Id found"));
         return inventory;
     }
 
-    @Cacheable
+
     @Transactional
     private Product createProduct(Product product) {
         // First check if the product already exists
@@ -82,6 +91,16 @@ public class ReorderingServiceImp implements ReorderingService {
         return product;
     }
 
+    /**
+     * Clears the cache for a given key when the data is updated.
+     * @param inventory
+     * @return
+     */
+    @CacheEvict(value = "inventory", key = "#inventory.id")
+    public Inventory updateInventory(Inventory inventory) {
+        return  inventoryRepository.save(inventory);
+    }
+
     @Override
     public WareHouse createWareHouse(WareHouse wareHouse) {
         // First check if the wareHouse already exists
@@ -93,8 +112,23 @@ public class ReorderingServiceImp implements ReorderingService {
         log.info("Inventory already exists, no need of creating it again");
         return wareHouse;
     }
+
+    /**
+     * Useful when saving and updating and desires latest cache.
+     * @param wareHouse
+     * @return
+     */
+    @CachePut(value = "warehouse",key = "#warehouse.id")
+    public WareHouse updateAndCacheWareHouse(WareHouse wareHouse) {
+        return wareHouseRepository.save(wareHouse);
+    }
+
+    @Cacheable(value = "orders")
+    public List<Order> getOrder(User user, LocalDateTime localDateTime) {
+        return orderRepository.findByIdAndCreatedDate(user.getId(), localDateTime);
+    }
+
     @Override
-    @Cacheable
     public Inventory createInventory(Inventory inventory) {
         // First check if the inventory already exists
         // Usually, other parameters  such as wareHouse code would be used to query the DB to find out if the inventory already exists.

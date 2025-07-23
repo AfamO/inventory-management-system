@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.Arrays;
+
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties(AppProperties.class)
@@ -49,7 +51,7 @@ public class InventorySystemApplication {
 					.phone("08034561289")
 					.address("No 2 Ciga Gufu Street, Ojota, Lagos")
 					.build();
-			log.info("My User builder object is {}",user);
+			log.info("My User builder object is {}",user.toString());
 		};
 	}
 
